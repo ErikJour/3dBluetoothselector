@@ -3,13 +3,13 @@
 //===========================================================
 //Main Loop
 //===========================================================
-static WindowDelegate *gWindowDelegate = nil;
+static BtWindowDel *btWindowDelegate = nil;
 
 int main(int argc, const char *argv[])
 {
     NSApplication *app = [NSApplication sharedApplication];
-    gWindowDelegate    = [[WindowDelegate alloc] init];
-    app.delegate       = gWindowDelegate;
+    btWindowDelegate   = [[BtWindowDel alloc] init];
+    app.delegate       = btWindowDelegate;
 
     return NSApplicationMain(argc, argv);
 }

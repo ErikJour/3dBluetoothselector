@@ -38,3 +38,51 @@ target_link_libraries(BluetoothSelector
         "-framework CoreVideo"
         "-framework CoreMedia")
 
+#=========================================================
+#Metal
+#=========================================================
+set(METAL_AIR
+        ${CMAKE_CURRENT_BINARY_DIR}/shaders.air
+)
+
+set(METALLIB
+        ${CMAKE_CURRENT_BINARY_DIR}/shaders.metallib
+)
+
+add_custom_command(
+        OUTPUT ${METALLIB}
+
+        COMMAND xcrun -sdk macosx metal
+        -c
+        ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shaders.metal
+        -o ${METAL_AIR}
+
+        COMMAND xcrun -sdk macosx metallib
+        ${METAL_AIR}
+        -o ${METALLIB}
+
+        DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shaders.metal
+
+        COMMENT "Compiling Metal shaders"
+)
+
+target_sources(BluetoothSelector PRIVATE
+        ${METALLIB}
+)
+
+set_source_files_properties(
+        ${METALLIB}
+        PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources
+        GENERATED TRUE
+)
+
+# We compile Metal ourselves above, but still want the .metal
+# file visible/editable inside Xcode.
+set_source_files_properties(
+        Shaders/shaders.metal
+        PROPERTIES
+        HEADER_FILE_ONLY TRUE
+)
+

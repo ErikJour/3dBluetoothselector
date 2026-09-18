@@ -7,12 +7,12 @@
 //===========================================================================
 //We create a WindowDelegate class. Inherits from NSObject, adpots NSApplicationDelegate and NSWindowDelegate
 //===========================================================================
-@interface WindowDelegate: NSObject <NSApplicationDelegate, NSWindowDelegate>
+@interface
+BtWindowDel: NSObject <NSApplicationDelegate, NSWindowDelegate>
 @end
-//===========================================================================
-//These are our instance variables we will use in the WindowDelegate
-//===========================================================================
-@implementation WindowDelegate
+
+//Member variables
+@implementation BtWindowDel
 {
     // The on-screen window: title bar, frame, screen position
     NSWindow*     _window;
@@ -22,7 +22,6 @@
     CAMetalLayer* _metalLayer;
     // Our code: owns the Metal device/queue/pipelines and draws each frame
     Renderer*     _renderer;
-
 }
 //===========================================================
 //This is our initialization, called by OS via main in NSApplication
@@ -45,7 +44,7 @@
 
     _window.releasedWhenClosed = NO;
     _window.minSize            = NSMakeSize(GLOBAL_WIDTH, GLOBAL_HEIGHT);
-    _window.backgroundColor    = NSColor.blackColor;
+    _window.backgroundColor    = NSColor.orangeColor;
     _window.title              = @"Bluetooth Selector";
     _window.delegate           = self;
     //============================================================================
@@ -67,14 +66,11 @@
     _videoView.layer                 = _metalLayer; //We are setting _videoView to hold our metal renderer
     _videoView.wantsLayer            = YES;
     _videoView.autoresizingMask      = NSViewWidthSizable | NSViewHeightSizable;
-    [contentView addSubview:_videoView];
+    //[contentView addSubview:_videoView];
     [self updateDrawableSize];
     //============================================================================
     //Renderer Setup
     //============================================================================
-    // Builds the pipeline, opens the videos, and starts drawing into this layer on the render thread
-    //_renderer = [[Renderer alloc] initWithMetalLayer:_metalLayer];
-
     if ([NSUserDefaults.standardUserDefaults boolForKey:@"keepOnTop"])
     {
         _window.level = NSFloatingWindowLevel;
@@ -109,7 +105,6 @@
 {
     [self updateDrawableSize];
 }
-
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
 {
