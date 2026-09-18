@@ -1,4 +1,5 @@
 #import <Metal/Metal.h>
+#import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
 #import "AppLifecycle/Renderer.h"
 
@@ -16,11 +17,7 @@ BtWindowDel: NSObject <NSApplicationDelegate, NSWindowDelegate>
 {
     // The on-screen window: title bar, frame, screen position
     NSWindow*     _window;
-    // The area inside the window we draw in
-    NSView*       _videoView;
-    // The view's backing layer: supplies drawable textures and presents them to the screen
-    CAMetalLayer* _metalLayer;
-    // Our code: owns the Metal device/queue/pipelines and draws each frame
+	MTKView*      _metalKitView;
     Renderer*     _renderer;
 }
 //===========================================================
@@ -50,24 +47,11 @@ BtWindowDel: NSObject <NSApplicationDelegate, NSWindowDelegate>
     //============================================================================
     //Metal Layer Setup
     //============================================================================
-    _metalLayer                 = [[CAMetalLayer alloc] init];
-    _metalLayer.device          = MTLCreateSystemDefaultDevice();
-    _metalLayer.opaque          = YES;
-    _metalLayer.framebufferOnly = YES;
-    _metalLayer.backgroundColor = CGColorGetConstantColor(kCGColorBlack);
-    _metalLayer.pixelFormat     = MTLPixelFormatRGBA16Float;
-    _metalLayer.colorspace      = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-    //============================================================================
-    //View Setup
-    //============================================================================
-    NSView* contentView              = [[NSView alloc] initWithFrame:_window.contentLayoutRect];
-    _window.contentView              = contentView; //Root view of our app. Holds renderer and slider
-    _videoView                       = [[NSView alloc] initWithFrame:contentView.bounds];
-    _videoView.layer                 = _metalLayer; //We are setting _videoView to hold our metal renderer
-    _videoView.wantsLayer            = YES;
-    _videoView.autoresizingMask      = NSViewWidthSizable | NSViewHeightSizable;
-    //[contentView addSubview:_videoView];
-    [self updateDrawableSize];
+    _metalKitView                 = [[MTKView alloc] initWithFrame:_window.contentLayoutRect];
+    _metalKitView.device          = MTLCreateSystemDefaultDevice();
+    _metalKitView.framebufferOnly = YES;
+    _metalKitView.colorspace      = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+	_window.contentView           = _metalKitView;
     //============================================================================
     //Renderer Setup
     //============================================================================
@@ -78,32 +62,6 @@ BtWindowDel: NSObject <NSApplicationDelegate, NSWindowDelegate>
 
     [_window makeKeyAndOrderFront: nil];
     [NSApp activate];
-}
-
-//===========================================================
-//Sizing
-//===========================================================
-- (void)updateDrawableSize
-{
-    NSSize backingSize  = [_videoView convertSizeToBacking:_videoView.bounds.size];
-    CGSize drawableSize = CGSizeMake(MAX(1.0, floor(backingSize.width)),
-                                     MAX(1.0, floor(backingSize.height)));
-
-    _metalLayer.contentsScale = _window.backingScaleFactor;
-    if (!CGSizeEqualToSize(_metalLayer.drawableSize, drawableSize))
-    {
-        _metalLayer.drawableSize = drawableSize;
-    }
-}
-
-- (void)windowDidResize:(NSNotification *)notification
-{
-    [self updateDrawableSize];
-}
-
-- (void)windowDidChangeBackingProperties:(NSNotification *)notification
-{
-    [self updateDrawableSize];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
